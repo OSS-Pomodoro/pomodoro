@@ -1,6 +1,8 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import time
+import pomodoro_feature2
+from datetime import date
 
 TIMER_CSS = """
 <style>
@@ -48,7 +50,7 @@ Modified by: Donghyeon Ko
 st.sidebar.title("Settings")
 focus_min = st.sidebar.number_input("Focus Time (minutes)", 5, 60, 25)
 break_min = st.sidebar.number_input("Break Time (minutes)", 1, 30, 5)
-
+selectedDate = st.sidebar.date_input("📅 Select Date", value=date.today())
 
 button_clicked = st.button("Start")
 
@@ -68,3 +70,5 @@ if button_clicked:
             components.html(draw_circle(t, t2), height=260, scrolling=False)
         time.sleep(1)
     st.toast("⏰ Break is over!", icon="⏰")
+
+pomodoro_feature2.ShowTodoSection(selectedDate)
