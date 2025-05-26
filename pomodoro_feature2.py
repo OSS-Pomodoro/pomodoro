@@ -1,13 +1,22 @@
 import streamlit as st
 from datetime import date
 
-# 날짜별 Todo 저장용 세션 상태 초기화
-if "todoData" not in st.session_state:
-    st.session_state.todoData = {}
+#세션 상태 초기화하는 함수
+def InitSessionState():
+    # 날짜별 Todo 저장용 세션 상태 초기화
+    if "todoData" not in st.session_state:
+        st.session_state.todoData = {}
 
-# 날짜별 새로운 입력 위젯 키를 관리할 상태 초기화
-if "inputKeySuffix" not in st.session_state:
-    st.session_state.inputKeySuffix = {}
+    if "inputKeySuffix" not in st.session_state:
+        '''
+        날짜별 새로운 입력 위젯 키를 관리할 상태 초기화
+        위젯에 목표를 적고 add하면 위젯 안에 작성한 단어는 초기화 됨 =>
+        일일이 지우고 작성할 필요가 없게 하기 위함. 
+        '''
+        st.session_state.inputKeySuffix = {}
+    
+    if "pomodoroIndex" not in st.session_state:
+        st.session_state.pomodoroIndex = 0
 
 def ShowTodoSection(selectedDate):
     st.subheader(f"📋 To-Do List for {selectedDate.strftime('%Y-%m-%d')}")

@@ -46,9 +46,10 @@ Modified by: Donghyeon Ko
 
 """)
 
+
 # Timer
 st.sidebar.title("Settings")
-focus_min = st.sidebar.number_input("Focus Time (minutes)", 5, 60, 25)
+focus_min = st.sidebar.number_input("Focus Time (minutes)", 1, 60, 25)
 break_min = st.sidebar.number_input("Break Time (minutes)", 1, 30, 5)
 selectedDate = st.sidebar.date_input("📅 Select Date", value=date.today())
 
@@ -56,6 +57,9 @@ button_clicked = st.button("Start")
 
 t1 = focus_min * 60
 t2 = break_min * 60
+
+pomodoro_feature2.InitSessionState()
+st.subheader(f"현재 {st.session_state.pomodoroIndex}포모도로 진행 중입니다.")
 
 if button_clicked:
     container=st.empty()
@@ -70,5 +74,6 @@ if button_clicked:
             components.html(draw_circle(t, t2), height=260, scrolling=False)
         time.sleep(1)
     st.toast("⏰ Break is over!", icon="⏰")
+    st.session_state.pomodoroIndex += 1
 
 pomodoro_feature2.ShowTodoSection(selectedDate)
