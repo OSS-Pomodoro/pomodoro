@@ -1,5 +1,7 @@
 import streamlit as st
 from datetime import date
+import json
+import os
 
 #세션 상태 초기화하는 함수
 def InitSessionState():
@@ -15,9 +17,24 @@ def InitSessionState():
         '''
         st.session_state.inputKeySuffix = {}
     
+    # 포모도로 카운트 저장용 세션 상태 초기화화
     if "pomodoroIndex" not in st.session_state:
         st.session_state.pomodoroIndex = 0
 
+    if "timer_start" not in st.session_state:
+        st.session_state.timer_start = None
+
+    if "timer_duration" not in st.session_state:
+        st.session_state.timer_duration = 0
+
+    if "timer_mode" not in st.session_state:
+        st.session_state.timer_mode = None
+
+    # 날짜별 포모도로 카운트들을 담는 딕셔너리
+    if 'pomodoroCounts' not in st.session_state:
+        st.session_state.pomodoroCounts = {}
+
+            
 def ShowTodoSection(selectedDate):
     st.subheader(f"📋 To-Do List for {selectedDate.strftime('%Y-%m-%d')}")
 
@@ -53,6 +70,7 @@ def ShowTodoSection(selectedDate):
             st.session_state.todoData[todoKey] = todos
             st.session_state[checkedKey].append(False)
             st.session_state.inputKeySuffix[todoKey] += 1 # 입력창 초기화
+            SaveTheState()
 
     # 체크된 항목 삭제
     if st.button("🗑️ Delete Checked Tasks", key=f"{todoKey}_delete_btn"):
@@ -65,3 +83,49 @@ def ShowTodoSection(selectedDate):
 
         st.session_state.todoData[todoKey] = newTodos
         st.session_state[checkedKey] = newChecked
+        SaveTheState()
+
+# 지금까지 저장된 todolist는 json파일로 저장장
+def SaveTheState():
+    FILENAME = "todoData.json"
+    dataToSave = {}
+    for dateKey, todos in st.session_state.todoData.items():
+        checkedKey = f"{dateKey}_checked"
+        checkedState = st.session_state.get(checkedKey, [False] * len(todos))
+        pomodoroCount = st.session_state.pomodoroCounts.get(dateKey, 0)
+        dataToSave[dateKey] = {
+            "tasks": todos,
+            "checked": checkedState,
+            "pomodoroCount": pomodoroCount
+        }
+
+    with open(FILENAME, "w", encoding="utf-8") as f:
+        json.dump(dataToSave, f, ensure_ascii=False, indent=2)
+
+# json파일을 불러오는 함수수
+def LoadTodoData():
+    FILENAME = "todoData.json"
+    if os.path.exists(FILENAME):
+        with open(FILENAME, "r", encoding="utf-8") as f:
+            loadedData = json.load(f)
+        
+        if 'todoData' not in st.session_state.todoData:
+            st.session_state.todoData = {}
+
+        for dateKey, data in loadedData.items():
+            # todolist를 json파일에서 불러옴
+            st.session_state.todoData[dateKey] = data.get("tasks", [])
+            checkedKey = f"{dateKey}_checked"
+            
+            # todolist에서 체크된 항목을 불러옴
+            # 여기서 체크된 항목은 작업을 끝낸 항목
+            st.session_state[checkedKey] = data.get("checked", [False]*len(st.session_state.todoData[dateKey]))
+
+            # 선택된 캘린더에서 수행한 포모도로 카운트를 불러옴
+            # pomodoroCounts => {'25-05-30' : 3, '25-05-31' :1} 이런식
+            if "pomodoroCounts" not in st.session_state:
+                st.session_state.pomodoroCounts = {}
+            st.session_state.pomodoroCounts[dateKey] = data.get("pomodoroCount", 0)
+    else:
+        st.session_state.todoData = {}
+        st.session_state.pomodoroCounts = {}
