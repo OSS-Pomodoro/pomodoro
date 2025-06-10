@@ -177,17 +177,7 @@ else:
         if audio:
             st.audio(f"/mnt/data/{audio}", format="audio/mp3", start_time=0)
 
-        if st.button("👉 계속하기", key="continue_button"):
-            st.session_state.show_final_feedback = False
-            st.rerun()
-
         st.stop()
-
-# reload 파라미터 감지 → 원래 화면으로 복귀
-if st.query_params.get("reload") == "true":
-    st.session_state.show_final_feedback = False
-    st.experimental_set_query_params()
-    st.rerun()
 
 if not st.session_state.get("show_final_feedback", False):
     st.markdown("### 📊 최근 통계 기반 격려")
