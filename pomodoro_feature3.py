@@ -3,7 +3,7 @@ import streamlit.components.v1 as components
 import time
 import json
 import os
-import pandas as pd  # 통계 그래프를 위한 데이터 분석 라이브러리
+import pandas as pd
 from datetime import date, datetime
 
 # ── 세션 상태 초기화 ──
@@ -32,22 +32,15 @@ def ShowTodoSection(selectedDate):
     if checkedKey not in st.session_state:
         st.session_state[checkedKey] = [False] * len(todos)
 
-    # 체크박스 출력
     checkedStates = []
     for i, task in enumerate(todos):
-        checked = st.checkbox(task,
-                              value=st.session_state[checkedKey][i],
-                              key=f"{todoKey}_task_{i}")
+        checked = st.checkbox(task, value=st.session_state[checkedKey][i], key=f"{todoKey}_task_{i}")
         checkedStates.append(checked)
     st.session_state[checkedKey] = checkedStates
 
-    # 새 할 일 추가
     if todoKey not in st.session_state.inputKeySuffix:
         st.session_state.inputKeySuffix[todoKey] = 0
-    newTask = st.text_input(
-        "Add new task",
-        key=f"{todoKey}_new_task_input_{st.session_state.inputKeySuffix[todoKey]}"
-    )
+    newTask = st.text_input("Add new task", key=f"{todoKey}_new_task_input_{st.session_state.inputKeySuffix[todoKey]}")
     if st.button("➕ Add Task", key=f"{todoKey}_add_btn"):
         if newTask.strip():
             todos.append(newTask.strip())
@@ -56,7 +49,6 @@ def ShowTodoSection(selectedDate):
             st.session_state.inputKeySuffix[todoKey] += 1
             SaveTheState()
 
-    # 체크된 항목 삭제
     if st.button("🗑️ Delete Checked Tasks", key=f"{todoKey}_delete_btn"):
         newTodos, newChecks = [], []
         for task, chk in zip(todos, checkedStates):
@@ -89,8 +81,7 @@ def LoadTodoData():
         st.session_state.pomodoroCounts = {}
         for d, v in data.items():
             st.session_state.todoData[d] = v.get('tasks', [])
-            st.session_state[f"{d}_checked"] = v.get(
-                'checked', [False] * len(st.session_state.todoData[d]))
+            st.session_state[f"{d}_checked"] = v.get('checked', [False] * len(st.session_state.todoData[d]))
             st.session_state.pomodoroCounts[d] = v.get('pomodoroCount', 0)
     else:
         st.session_state.todoData = {}
@@ -152,14 +143,13 @@ def main():
     sel_str = sel.strftime('%Y-%m-%d')
     st.session_state.pomodoroIndex = st.session_state.pomodoroCounts.get(sel_str, 0)
 
-    # 시작 버튼 & 타이머 로직
     if st.button("Start"):
         st.session_state.timer_mode = 'focus'
         st.session_state.timer_duration = focus_min * 60
         t0 = st.session_state.timer_duration
         box = st.empty()
         for t in range(t0, -1, -1):
-            box.components.html(draw_circle(t, t0), height=260, scrolling=False)
+            box.markdown(draw_circle(t, t0), unsafe_allow_html=True)
             time.sleep(1)
         st.toast("🔔 Focus complete! Time for a break.", icon="🍅")
         st.session_state.timer_mode = 'break'
@@ -167,7 +157,6 @@ def main():
         st.session_state.timer_duration = break_min * 60
         st.rerun()
 
-    # 휴식 타이머 & 레이아웃
     elif st.session_state.timer_mode == 'break' and st.session_state.timer_start:
         elapsed = (datetime.now() - st.session_state.timer_start).total_seconds()
         rem = int(st.session_state.timer_duration - elapsed)
@@ -180,7 +169,7 @@ def main():
             st.session_state.timer_start = None
             st.rerun()
         else:
-            components.html(draw_circle(rem, st.session_state.timer_duration), height=260)
+            components.html(draw_circle(rem, st.session_state.timer_duration), height=260, scrolling=False)
             col1, col2 = st.columns(2)
             with col1:
                 ShowTodoSection(sel)
@@ -188,8 +177,6 @@ def main():
                 ShowPomodoroStats()
             time.sleep(1)
             st.rerun()
-
-    # 기본 화면 (To-Do + 통계 그리드)
     else:
         col1, col2 = st.columns(2)
         with col1:
