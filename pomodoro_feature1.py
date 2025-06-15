@@ -54,7 +54,7 @@ def get_feedback_after_pomodoro():
     total_tasks = len(checked_list)
     pomodoro_count = pomodoro_feature2.st.session_state.pomodoroCounts.get(today, 0)
 
-    if total_tasks > 0 or completed_tasks == total_tasks or pomodoro_count >= 6:
+    if (total_tasks > 0 and completed_tasks == total_tasks) or pomodoro_count >= 6:
         return "🏆 오늘 완벽하게 해냈어요! 대단해요!"
     elif completed_tasks >= 1 or pomodoro_count >= 3:
         return "✅ 성실히 임하고 있어요. 이대로만 가도 좋아요!"
